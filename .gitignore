@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# build output (Vercel builds this itself)
+dist/
+
+# uploaded images (stored on Render, not in git)
+public/uploads/
+
+# local env overrides (keep .env.production and .env.development)
+.env.local
+.env.*.local
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.vscode/

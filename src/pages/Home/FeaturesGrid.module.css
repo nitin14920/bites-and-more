@@ -1,0 +1,121 @@
+.section {
+  padding: 7rem 5%;
+}
+
+.label  { display: block; }
+.title  { max-width: 640px; }
+.sub    { max-width: 520px; margin-bottom: 0; }
+
+/* ── 4-column grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2px;
+  margin-top: 4rem;
+}
+
+/* ── card base ── */
+.card {
+  padding: 3rem 2.5rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s, border-color 0.3s;
+  min-height: 260px;
+  display: flex;
+  align-items: flex-end;   /* content sits at bottom when image present */
+}
+
+/* gold shimmer top bar on hover */
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  transform: scaleX(0);
+  transition: transform 0.4s;
+  z-index: 2;
+}
+.card:hover               { background: rgba(201,144,58,0.05); }
+.card:hover::before       { transform: scaleX(1); }
+.card.cardHasImage:hover  { background: transparent; }
+
+/* ── background image ── */
+.bgImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: transform 0.6s ease;
+}
+.card:hover .bgImage { transform: scale(1.05); }
+
+/* ── dark scrim over image so text stays readable ── */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(26,22,18,0.92) 0%,
+    rgba(26,22,18,0.55) 55%,
+    rgba(26,22,18,0.25) 100%
+  );
+  z-index: 1;
+}
+
+/* ── admin upload overlay (shown on hover, admin only) ── */
+.uploadOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(0,0,0,0.5);
+  opacity: 0;
+  transition: opacity 0.25s;
+  cursor: pointer;
+}
+.card:hover .uploadOverlay { opacity: 1; }
+
+.uploadIcon  { font-size: 1.8rem; }
+.uploadLabel {
+  font-size:     0.68rem;
+  color:         var(--cream);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── card content ── */
+.cardBody {
+  position: relative;
+  z-index: 3;       /* above scrim and bgImage */
+  width: 100%;
+}
+
+.cardIcon {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+.cardTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; font-weight: 700;
+  color: var(--cream); margin-bottom: 0.8rem;
+}
+.cardDesc {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+/* ── responsive ── */
+@media (max-width: 600px) {
+  .section { padding: 5rem 5%; }
+  .grid    { margin-top: 2.5rem; }
+  .card    { padding: 2rem 1.5rem; min-height: 220px; }
+}

@@ -1,0 +1,102 @@
+.section {
+  padding: 7rem 5%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+/* ── IMAGE COLUMN ── */
+.imgCol   { position: relative; }
+
+.imgMain {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(135deg, var(--espresso), rgba(168,76,47,0.3));
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* admin click-to-upload cursor */
+.imgMainAdmin { cursor: pointer; }
+
+.photo {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.80;
+  transition: opacity 0.4s;
+}
+
+.placeholder {
+  font-size: 5rem;
+  color: rgba(201,144,58,0.35);
+  position: relative; z-index: 1;
+  transition: opacity 0.4s;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* hover upload overlay (admin only) */
+.uploadOverlay {
+  position: absolute; inset: 0; z-index: 3;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none; /* clicks go to parent */
+}
+.imgMainAdmin:hover .uploadOverlay { opacity: 1; }
+
+.overlayIcon  { font-size: 2.2rem; }
+.overlayLabel {
+  font-size: 0.72rem;
+  color: var(--cream);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ── ROTATING GOLD BADGE ── */
+.badge {
+  position: absolute;
+  bottom: -1.5rem; right: -1.5rem;
+  width: 130px; height: 130px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  color: var(--charcoal);
+  font-family: 'Playfair Display', serif;
+  animation: rotateBadge 10s linear infinite;
+  pointer-events: none;
+}
+.badgeStar { font-size: 2rem; font-weight: 900; line-height: 1; }
+.badgeText { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; }
+
+@keyframes rotateBadge { to { transform: rotate(360deg); } }
+
+/* ── TEXT COLUMN ── */
+.body {
+  color: var(--muted);
+  line-height: 1.9;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .section { grid-template-columns: 1fr; gap: 4rem; }
+  .badge   { width: 110px; height: 110px; bottom: -1rem; right: -1rem; }
+}
+@media (max-width: 600px) {
+  .section { padding: 5rem 5%; gap: 3rem; }
+}

@@ -1,0 +1,33 @@
+.statsSection {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border); /* gap colour = border */
+}
+
+.cell {
+  background: var(--charcoal);
+  padding: 3.5rem 2rem;
+  text-align: center;
+}
+
+.num {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 5vw, 3.5rem);
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── responsive ── */
+@media (max-width: 700px) {
+  .statsSection { grid-template-columns: repeat(2, 1fr); }
+}

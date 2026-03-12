@@ -1,0 +1,164 @@
+/* ── HERO WRAPPER ── */
+.hero {
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* no top padding — Layout pushes main down 72px, hero occupies full 100vh */
+  margin-top: -72px;
+}
+
+/* decorative layers */
+.heroBg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(168,76,47,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(201,144,58,0.10) 0%, transparent 50%),
+    linear-gradient(135deg, #0d0b09 0%, #1a1612 50%, #0d0b09 100%);
+}
+.heroGrain {
+  position: absolute; inset: 0; opacity: 0.04; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── SLIDESHOW ── */
+.slideshow { position: absolute; inset: 0; overflow: hidden; }
+
+.slide {
+  position: absolute; inset: 0;
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #0d0b09, #1a1612);
+}
+.slideActive { opacity: 1; }
+
+.slideImg {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(0.42) saturate(0.8);
+}
+.slidePlaceholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8rem; opacity: 0.10;
+  user-select: none;
+}
+
+/* ── ADMIN CONTROLS (top-right) ── */
+.adminControls {
+  position: absolute; top: 90px; right: 2rem;
+  z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 0.7rem;
+}
+.uploadBtn {
+  padding: 0.45rem 1.1rem;
+  background: rgba(201,144,58,0.88);
+  border: none; border-radius: 20px;
+  color: #1a1612;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.25s;
+}
+.uploadBtn:hover { background: var(--gold-light); }
+
+.slotDots { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; }
+.slotDot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid rgba(201,144,58,0.5);
+  background: rgba(26,22,18,0.75);
+  color: var(--gold); font-size: 0.6rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; backdrop-filter: blur(4px);
+}
+.slotDotFilled  { border-color: var(--gold); background: rgba(201,144,58,0.22); }
+.slotDotActive  { transform: scale(1.18); border-color: var(--gold-light); }
+.slotDot:hover  { background: rgba(201,144,58,0.35); }
+
+/* ── NAV DOTS (bottom-center) ── */
+.navDots {
+  position: absolute; bottom: 5rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 0.55rem; z-index: 10;
+}
+.navDot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(245,240,232,0.3);
+  border: 1px solid rgba(245,240,232,0.4);
+  cursor: pointer; padding: 0;
+  transition: all 0.3s;
+}
+.navDotActive {
+  background: var(--gold);
+  border-color: var(--gold);
+  transform: scale(1.35);
+}
+
+/* ── HERO TEXT ── */
+.content {
+  position: relative; z-index: 2;
+  text-align: center; max-width: 700px; padding: 0 2rem;
+}
+.eyebrow {
+  font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 1.5rem;
+  opacity: 0; animation: fadeUp 0.8s 0.8s forwards;
+}
+.title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  line-height: 1.05; font-weight: 900; color: var(--cream);
+  margin-bottom: 1.5rem;
+  opacity: 0; animation: fadeUp 0.8s 1s forwards;
+}
+.title em { font-style: italic; color: var(--gold); }
+
+.quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-style: italic; color: var(--muted); line-height: 1.7;
+  margin-bottom: 2.5rem;
+  transition: opacity 0.5s ease;
+  opacity: 0; animation: fadeUp 0.8s 1.2s forwards;
+}
+.cta {
+  display: inline-flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center;
+  opacity: 0; animation: fadeUp 0.8s 1.4s forwards;
+}
+
+/* ── SCROLL HINT ── */
+.scrollHint {
+  position: absolute; bottom: 2.5rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+  opacity: 0; animation: fadeIn 1s 2s forwards;
+}
+.scrollHint span {
+  font-size: 0.65rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--muted);
+}
+.scrollLine {
+  width: 1px; height: 50px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollPulse 2s infinite;
+}
+
+/* ── KEYFRAMES ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50%       { opacity: 1;   transform: scaleY(1.2); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .adminControls { top: 80px; right: 1rem; }
+  .uploadBtn      { font-size: 0.65rem; padding: 0.38rem 0.85rem; }
+}
