@@ -224,13 +224,14 @@ export function AdminProvider({ children }) {
   useEffect(() => {
     loadSharedImages().then(shared => {
       if (!shared) return;
-      if (shared.heroSlides)      setHeroSlides(shared.heroSlides);
-      if (shared.specialtyImage)  setSpecialtyImage(shared.specialtyImage);
-      if (shared.featureImages)   setFeatureImages(shared.featureImages);
-      if (shared.galleryItems)    setGalleryItems(shared.galleryItems);
-      if (shared.aboutHeroImage)  setAboutHeroImage(shared.aboutHeroImage);
-      if (shared.teamAvatars)     setTeamAvatars(shared.teamAvatars);
-      if (shared.cardImages)      setCardImages(shared.cardImages);
+      // Only override defaults if JSONBin has real data
+      if (shared.heroSlides?.some(s => s.img))  setHeroSlides(shared.heroSlides);
+      if (shared.specialtyImage?.url)            setSpecialtyImage(shared.specialtyImage);
+      if (Object.keys(shared.featureImages || {}).length) setFeatureImages(shared.featureImages);
+      if (shared.galleryItems?.some(s => s.url)) setGalleryItems(shared.galleryItems);
+      if (shared.aboutHeroImage?.url)            setAboutHeroImage(shared.aboutHeroImage);
+      if (Object.keys(shared.teamAvatars || {}).length)   setTeamAvatars(shared.teamAvatars);
+      if (Object.keys(shared.cardImages || {}).length)    setCardImages(shared.cardImages);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
