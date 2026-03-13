@@ -282,19 +282,25 @@ export function AdminProvider({ children }) {
     if (old) await deleteImage(old).catch(console.warn);
     try {
       const { url, publicId } = await uploadImage(file, "hero", `slide-${idx}`);
-      setHeroSlides(prev => prev.map((s, i) => i === idx ? { ...s, img: url, publicId } : s));
+      setHeroSlides(prev => {
+        const next = prev.map((s, i) => i === idx ? { ...s, img: url, publicId } : s);
+        syncShared({ heroSlides: next });
+        return next;
+      });
       setUploadError("");
     } catch(e) { setUploadError(e.message); }
-  }, [heroSlides, setHeroSlides]);
+  }, [heroSlides, setHeroSlides, syncShared]);
 
   const updateSpecialtyImage = useCallback(async (file) => {
     const old = specialtyImageData?.publicId;
     if (old) await deleteImage(old).catch(console.warn);
     try {
       const { url, publicId } = await uploadImage(file, "specialty", "main");
-      setSpecialtyImage({ url, publicId }); setUploadError("");
+      setSpecialtyImage({ url, publicId });
+      syncShared({ specialtyImage: { url, publicId } });
+      setUploadError("");
     } catch(e) { setUploadError(e.message); }
-  }, [specialtyImageData, setSpecialtyImage]);
+  }, [specialtyImageData, setSpecialtyImage, syncShared]);
 
   /* ── MENU ── */
   const updateCardImage = useCallback(async (id, fileOrNull) => {
@@ -306,9 +312,14 @@ export function AdminProvider({ children }) {
     }
     try {
       const { url, publicId } = await uploadImage(fileOrNull, "menu", `card-${id}`);
-      setCardImages(prev => ({ ...prev, [id]: { url, publicId } })); setUploadError("");
+      setCardImages(prev => {
+        const next = { ...prev, [id]: { url, publicId } };
+        syncShared({ cardImages: next });
+        return next;
+      });
+      setUploadError("");
     } catch(e) { setUploadError(e.message); }
-  }, [cardImages, setCardImages]);
+  }, [cardImages, setCardImages, syncShared]);
 
   const togglePopular = useCallback((id) =>
     setPopularItemIds(prev => {
@@ -406,25 +417,37 @@ export function AdminProvider({ children }) {
     if (old) await deleteImage(old).catch(console.warn);
     try {
       const { url, publicId } = await uploadImage(file, "about", "hero");
-      setAboutHeroImage({ url, publicId }); setUploadError("");
+      setAboutHeroImage({ url, publicId });
+      syncShared({ aboutHeroImage: { url, publicId } });
+      setUploadError("");
     } catch(e) { setUploadError(e.message); }
-  }, [aboutHeroImageData, setAboutHeroImage]);
+  }, [aboutHeroImageData, setAboutHeroImage, syncShared]);
 
   const updateTeamAvatar = useCallback(async (id, file) => {
     const old = teamAvatars[id]?.publicId;
     if (old) await deleteImage(old).catch(console.warn);
     try {
       const { url, publicId } = await uploadImage(file, "team", `avatar-${id}`);
-      setTeamAvatars(prev => ({ ...prev, [id]: { url, publicId } })); setUploadError("");
+      setTeamAvatars(prev => {
+        const next = { ...prev, [id]: { url, publicId } };
+        syncShared({ teamAvatars: next });
+        return next;
+      });
+      setUploadError("");
     } catch(e) { setUploadError(e.message); }
-  }, [teamAvatars, setTeamAvatars]);
+  }, [teamAvatars, setTeamAvatars, syncShared]);
 
   const updateFeatureImage = useCallback(async (idx, file) => {
     const old = featureImages[idx]?.publicId;
     if (old) await deleteImage(old).catch(console.warn);
     try {
       const { url, publicId } = await uploadImage(file, "feature", `card-${idx}`);
-      setFeatureImages(prev => ({ ...prev, [idx]: { url, publicId } })); setUploadError("");
+      setFeatureImages(prev => {
+        const next = { ...prev, [idx]: { url, publicId } };
+        syncShared({ featureImages: next });
+        return next;
+      });
+      setUploadError("");
     } catch(e) { setUploadError(e.message); }
   }, [featureImages, setFeatureImages]);
 
