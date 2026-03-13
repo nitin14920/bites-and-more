@@ -3,7 +3,7 @@ import { galleryData }  from "../data/galleryData.js";
 import menuDataSeed     from "../data/menuData.js";
 import menuCatSeed      from "../data/menuCategories.js";
 import teamDataSeed     from "../data/teamData.js";
-import { uploadImage, deleteImage } from "../api/imageApi.js";
+import { uploadImage, deleteImage, loadSharedImages, saveSharedImages } from "../api/imageApi.js";
 
 /* ─────────────────────────────────────────────
    STORAGE KEYS  — one key per logical group so
@@ -171,6 +171,7 @@ export function AdminProvider({ children }) {
   /* ── Auth — sessionStorage + inactivity expiry ── */
   const [isAdmin,    setIsAdmin]    = useState(() => getSession() !== null);
   const [expiresAt,  setExpiresAt]  = useState(() => getSession()?.expiresAt ?? null);
+  const [uploadError, setUploadError] = useState("");
   const expireTimer = useRef(null);
 
   /* Arm/rearm the inactivity logout timer whenever expiresAt changes */
@@ -219,6 +220,27 @@ export function AdminProvider({ children }) {
   const [aboutHeroImageData, setAboutHeroImage] = usePersisted(KEYS.aboutHeroImage, null);
   const [teamAvatars,    setTeamAvatars]    = usePersisted(KEYS.teamAvatars,    {});
   const [featureImages,  setFeatureImages]  = usePersisted(KEYS.featureImages,  {});   // { [index]: url }
+  /* ── Shared image sync: load from JSONBin on mount, visible to ALL visitors ── */
+  useEffect(() => {
+    loadSharedImages().then(shared => {
+      if (!shared) return;
+      if (shared.heroSlides)      setHeroSlides(shared.heroSlides);
+      if (shared.specialtyImage)  setSpecialtyImage(shared.specialtyImage);
+      if (shared.featureImages)   setFeatureImages(shared.featureImages);
+      if (shared.galleryItems)    setGalleryItems(shared.galleryItems);
+      if (shared.aboutHeroImage)  setAboutHeroImage(shared.aboutHeroImage);
+      if (shared.teamAvatars)     setTeamAvatars(shared.teamAvatars);
+      if (shared.cardImages)      setCardImages(shared.cardImages);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* Helper: called after every image upload to persist to JSONBin */
+  const syncShared = useCallback((patch) => {
+    loadSharedImages().then(current => {
+      saveSharedImages({ ...(current || {}), ...patch });
+    });
+  }, []);
 
   /* ── MENU (editable) ── */
   const [menuCategories, setMenuCategories] = usePersisted(KEYS.menuCategories, null);
@@ -257,15 +279,20 @@ export function AdminProvider({ children }) {
   const updateHeroSlide = useCallback(async (idx, file) => {
     const old = heroSlides[idx]?.publicId;
     if (old) await deleteImage(old).catch(console.warn);
-    const { url, publicId } = await uploadImage(file, "hero", `slide-${idx}`);
-    setHeroSlides(prev => prev.map((s, i) => i === idx ? { ...s, img: url, publicId } : s));
+    try {
+      const { url, publicId } = await uploadImage(file, "hero", `slide-${idx}`);
+      setHeroSlides(prev => prev.map((s, i) => i === idx ? { ...s, img: url, publicId } : s));
+      setUploadError("");
+    } catch(e) { setUploadError(e.message); }
   }, [heroSlides, setHeroSlides]);
 
   const updateSpecialtyImage = useCallback(async (file) => {
     const old = specialtyImageData?.publicId;
     if (old) await deleteImage(old).catch(console.warn);
-    const { url, publicId } = await uploadImage(file, "specialty", "main");
-    setSpecialtyImage({ url, publicId });
+    try {
+      const { url, publicId } = await uploadImage(file, "specialty", "main");
+      setSpecialtyImage({ url, publicId }); setUploadError("");
+    } catch(e) { setUploadError(e.message); }
   }, [specialtyImageData, setSpecialtyImage]);
 
   /* ── MENU ── */
@@ -276,8 +303,10 @@ export function AdminProvider({ children }) {
       setCardImages(prev => { const n = {...prev}; delete n[id]; return n; });
       return;
     }
-    const { url, publicId } = await uploadImage(fileOrNull, "menu", `card-${id}`);
-    setCardImages(prev => ({ ...prev, [id]: { url, publicId } }));
+    try {
+      const { url, publicId } = await uploadImage(fileOrNull, "menu", `card-${id}`);
+      setCardImages(prev => ({ ...prev, [id]: { url, publicId } })); setUploadError("");
+    } catch(e) { setUploadError(e.message); }
   }, [cardImages, setCardImages]);
 
   const togglePopular = useCallback((id) =>
@@ -346,39 +375,56 @@ export function AdminProvider({ children }) {
   /* ── GALLERY ── */
   // Gallery: set a URL on an item (after server upload)
   const setGalleryItemUrl = useCallback((id, url, publicId) =>
-    setGalleryItems(prev => prev.map(item =>
-      String(item.id) === String(id) ? { ...item, url, ...(publicId ? {publicId} : {}) } : item
-    )), [setGalleryItems]);
+    setGalleryItems(prev => {
+      const next = prev.map(item =>
+        String(item.id) === String(id) ? { ...item, url, ...(publicId ? {publicId} : {}) } : item
+      );
+      syncShared({ galleryItems: next });
+      return next;
+    }), [setGalleryItems, syncShared]);
 
   // Gallery: add new items (metadata only — url set separately after upload)
   const addGalleryItems = useCallback((newItems) =>
-    setGalleryItems(prev => [...prev, ...newItems]), [setGalleryItems]);
+    setGalleryItems(prev => {
+      const next = [...prev, ...newItems];
+      syncShared({ galleryItems: next });
+      return next;
+    }), [setGalleryItems, syncShared]);
 
   // Gallery: remove an item by id
   const removeGalleryItem = useCallback((id) =>
-    setGalleryItems(prev => prev.filter(item => String(item.id) !== String(id))),
-  [setGalleryItems]);
+    setGalleryItems(prev => {
+      const next = prev.filter(item => String(item.id) !== String(id));
+      syncShared({ galleryItems: next });
+      return next;
+    }), [setGalleryItems, syncShared]);
 
   /* ── ABOUT ── */
   const updateAboutHeroImage = useCallback(async (file) => {
     const old = aboutHeroImageData?.publicId;
     if (old) await deleteImage(old).catch(console.warn);
-    const { url, publicId } = await uploadImage(file, "about", "hero");
-    setAboutHeroImage({ url, publicId });
+    try {
+      const { url, publicId } = await uploadImage(file, "about", "hero");
+      setAboutHeroImage({ url, publicId }); setUploadError("");
+    } catch(e) { setUploadError(e.message); }
   }, [aboutHeroImageData, setAboutHeroImage]);
 
   const updateTeamAvatar = useCallback(async (id, file) => {
     const old = teamAvatars[id]?.publicId;
     if (old) await deleteImage(old).catch(console.warn);
-    const { url, publicId } = await uploadImage(file, "team", `avatar-${id}`);
-    setTeamAvatars(prev => ({ ...prev, [id]: { url, publicId } }));
+    try {
+      const { url, publicId } = await uploadImage(file, "team", `avatar-${id}`);
+      setTeamAvatars(prev => ({ ...prev, [id]: { url, publicId } })); setUploadError("");
+    } catch(e) { setUploadError(e.message); }
   }, [teamAvatars, setTeamAvatars]);
 
   const updateFeatureImage = useCallback(async (idx, file) => {
     const old = featureImages[idx]?.publicId;
     if (old) await deleteImage(old).catch(console.warn);
-    const { url, publicId } = await uploadImage(file, "feature", `card-${idx}`);
-    setFeatureImages(prev => ({ ...prev, [idx]: { url, publicId } }));
+    try {
+      const { url, publicId } = await uploadImage(file, "feature", `card-${idx}`);
+      setFeatureImages(prev => ({ ...prev, [idx]: { url, publicId } })); setUploadError("");
+    } catch(e) { setUploadError(e.message); }
   }, [featureImages, setFeatureImages]);
 
   /* ── RESET (wipe all persisted data) ── */
@@ -443,6 +489,7 @@ export function AdminProvider({ children }) {
       updateFeatureImage,
       /* utility */
       resetAll,
+      uploadError, setUploadError,
     }}>
       {children}
     </AdminContext.Provider>
